@@ -1,0 +1,53 @@
+Commands:
+- open < index, type >
+- close < index, type >
+- communicate < index, type, data >
+- query_interface < index >
+- list_interfaces
+
+# Afterwards
+- server_command < data >
+
+Response:
+- 
+
+SocketConnection ():
+- send < string, length > (pascal string)
+- recieve < > (pascal string) 
+
+Client (SocketConnection):
+- connect < ip, port > (as part of c'tor?)
+- close <>
+
+Server: (SocketConnection) (should think of scalability for multi-client)
+- get_connection < is_blocked > (not part of init, for reconnecting)
+- is_open()
+
+Commander (client):
+# supply interface for commands
+- server_command < command_type, char *data >
+- connect < index, type >
+- disconnect < index, type >
+
+TunnelHandler (server):
+# contains handlers for the various commands
+ctor: create the list of interfaces (empty map)
+Handlers: List[Map <type, handler>]
+- recv
+- parse
+- handler / system
+
+
+#### Handlers
+ConnectionHandler:
+# Represent the ConnectionInterface
+- communicate < data, size >
+
+SSHConnection (ConnectionHandler):
+# keeps the handler
+- communicate
+
+FTPConnection (ConnectionHandler):
+pass
+
+TelnetConnection (ConnectionHandler):
