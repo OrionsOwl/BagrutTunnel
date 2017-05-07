@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/user/Documents/Repositories/BagrutTunnel/Server
+# Install script for directory: C:/Users/tal/Documents/BagrutTunnel/Server
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -35,5 +35,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/user/Documents/Repositories/BagrutTunnel/Server/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/tal/Documents/BagrutTunnel/Server/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

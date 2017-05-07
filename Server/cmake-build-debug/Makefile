@@ -38,19 +38,19 @@ cmake_force:
 SHELL = cmd.exe
 
 # The CMake executable.
-CMAKE_COMMAND = C:\Users\user\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe
+CMAKE_COMMAND = C:\Users\tal\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe
 
 # The command to remove a file.
-RM = C:\Users\user\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -E remove -f
+RM = C:\Users\tal\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\user\Documents\Repositories\BagrutTunnel\Server
+CMAKE_SOURCE_DIR = C:\Users\tal\Documents\BagrutTunnel\Server
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\user\Documents\Repositories\BagrutTunnel\Server\cmake-build-debug
+CMAKE_BINARY_DIR = C:\Users\tal\Documents\BagrutTunnel\Server\cmake-build-debug
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -58,7 +58,7 @@ CMAKE_BINARY_DIR = C:\Users\user\Documents\Repositories\BagrutTunnel\Server\cmak
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	C:\Users\user\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -E echo "No interactive CMake dialog available."
+	C:\Users\tal\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -E echo "No interactive CMake dialog available."
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -69,7 +69,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	C:\Users\user\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	C:\Users\tal\AppData\Local\JetBrains\Toolbox\apps\CLion\ch-0\171.4073.41\bin\cmake\bin\cmake.exe -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -79,9 +79,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\user\Documents\Repositories\BagrutTunnel\Server\cmake-build-debug\CMakeFiles C:\Users\user\Documents\Repositories\BagrutTunnel\Server\cmake-build-debug\CMakeFiles\progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\tal\Documents\BagrutTunnel\Server\cmake-build-debug\CMakeFiles C:\Users\tal\Documents\BagrutTunnel\Server\cmake-build-debug\CMakeFiles\progress.marks
 	$(MAKE) -f CMakeFiles\Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\user\Documents\Repositories\BagrutTunnel\Server\cmake-build-debug\CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start C:\Users\tal\Documents\BagrutTunnel\Server\cmake-build-debug\CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -122,6 +122,60 @@ Server/fast:
 	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/build
 .PHONY : Server/fast
 
+Server.obj: Server.cpp.obj
+
+.PHONY : Server.obj
+
+# target to build an object file
+Server.cpp.obj:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/Server.cpp.obj
+.PHONY : Server.cpp.obj
+
+Server.i: Server.cpp.i
+
+.PHONY : Server.i
+
+# target to preprocess a source file
+Server.cpp.i:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/Server.cpp.i
+.PHONY : Server.cpp.i
+
+Server.s: Server.cpp.s
+
+.PHONY : Server.s
+
+# target to generate assembly for a file
+Server.cpp.s:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/Server.cpp.s
+.PHONY : Server.cpp.s
+
+SocketConnection.obj: SocketConnection.cpp.obj
+
+.PHONY : SocketConnection.obj
+
+# target to build an object file
+SocketConnection.cpp.obj:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/SocketConnection.cpp.obj
+.PHONY : SocketConnection.cpp.obj
+
+SocketConnection.i: SocketConnection.cpp.i
+
+.PHONY : SocketConnection.i
+
+# target to preprocess a source file
+SocketConnection.cpp.i:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/SocketConnection.cpp.i
+.PHONY : SocketConnection.cpp.i
+
+SocketConnection.s: SocketConnection.cpp.s
+
+.PHONY : SocketConnection.s
+
+# target to generate assembly for a file
+SocketConnection.cpp.s:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/SocketConnection.cpp.s
+.PHONY : SocketConnection.cpp.s
+
 main.obj: main.cpp.obj
 
 .PHONY : main.obj
@@ -158,6 +212,12 @@ help:
 	@echo ... Server
 	@echo ... edit_cache
 	@echo ... rebuild_cache
+	@echo ... Server.obj
+	@echo ... Server.i
+	@echo ... Server.s
+	@echo ... SocketConnection.obj
+	@echo ... SocketConnection.i
+	@echo ... SocketConnection.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
