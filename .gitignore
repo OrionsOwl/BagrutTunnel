@@ -1,7 +1,4 @@
 */.idea/
 Client/cmake-build-debug/CMakeFiles/
 Server/cmake-build-debug/CMakeFiles/
-Client/cmake-build-debug/
-Server/cmake-build-debug/CMakeCache.txt
-Server/cmake-build-debug/Makefile
-Server/cmake-build-debug/Server.cbp
+*.exe
