@@ -1,3 +1,4 @@
 */.idea/
 Client/cmake-build-debug/CMakeFiles/
 Server/cmake-build-debug/CMakeFiles/
+*.exe
