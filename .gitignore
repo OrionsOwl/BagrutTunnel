@@ -2,3 +2,5 @@
 Client/cmake-build-debug/CMakeFiles/
 Server/cmake-build-debug/CMakeFiles/
 *.exe
+Client/cmake-build-debug/
+Server/cmake-build-debug/
