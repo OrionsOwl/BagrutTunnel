@@ -19,6 +19,21 @@ Client::Client(const char *host_name, const char *port_name) {
     connect_socket(host_name, port_name);
 }
 
+Client::~Client() {
+    int socket_res;
+
+    if (INVALID_SOCKET != conn_socket) {
+        // shutdown the connection since we're done
+        socket_res = shutdown(conn_socket, SD_SEND);
+        if (socket_res == SOCKET_ERROR) {
+            printf("shutdown failed with error: %d\n", WSAGetLastError());
+        }
+        closesocket(conn_socket);
+        conn_socket = INVALID_SOCKET;
+    }
+    WSACleanup();
+}
+
 int Client::connect_socket(const char *hostname, const char *port_name) {
     int socket_res;
     struct addrinfo *result = NULL, *ptr = NULL, hints;
@@ -46,7 +61,7 @@ int Client::connect_socket(const char *hostname, const char *port_name) {
         }
 
         // Connect to server.
-        socket_res = connect( conn_socket, ptr->ai_addr, (int)ptr->ai_addrlen);
+        socket_res = connect(conn_socket, ptr->ai_addr, (int)ptr->ai_addrlen);
         if (SOCKET_ERROR == socket_res) {
             closesocket(conn_socket);
             conn_socket = INVALID_SOCKET;
@@ -62,9 +77,4 @@ int Client::connect_socket(const char *hostname, const char *port_name) {
         return 1;
     }
     return 0;
-}
-
-Client::~Client() {
-    closesocket(conn_socket);
-    WSACleanup();
 }

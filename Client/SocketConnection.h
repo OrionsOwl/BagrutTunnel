@@ -24,7 +24,7 @@ protected:
     SOCKET conn_socket = INVALID_SOCKET;
 public:
     int send_buffer(char *buffer, uint16_t buf_size);
-    int recv_data();
+    int recv_data(char *recvbuf, int max_bufsize, int *recvsize);
 };
 
 

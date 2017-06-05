@@ -1,20 +1,23 @@
 //
-// Created by tal on 04-May-17.
+// Created by user on 27/04/2017.
 //
 
 #ifndef SERVER_SERVER_H
 #define SERVER_SERVER_H
 
+
 #include "SocketConnection.h"
 
-class Server : public SocketConnection {
+class Server: public SocketConnection {
 private:
-    int get_connection(const char *host_name, const char *port_name, int buflen);
-
+    SOCKET listen_socket = INVALID_SOCKET;
+    int initiate_listening_socket(const char *port_name);
 public:
-    Server(const char *host_name, const char *port_name, int buflen);
-    SOCKET get_conn_socket();
+    Server(const char *port_name);
     ~Server();
+
+    int wait_for_client();
+    int close_client();
 };
 
 

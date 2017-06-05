@@ -8,11 +8,11 @@
 int SocketConnection::send_buffer(char *buffer, uint16_t buf_size) {
     int result;
 
-//    result = send(conn_socket, (const char *) buf_size, sizeof(buf_size), 0);
-//    if (SOCKET_ERROR == result) {
-//        printf("send failed with error: %d\n", WSAGetLastError());
-//        return -1;
-//    }
+    result = send(conn_socket, (char *)&buf_size, sizeof(buf_size), 0);
+    if (SOCKET_ERROR == result) {
+        printf("send failed with error: %d\n", WSAGetLastError());
+        return -1;
+    }
 
     result = send(conn_socket, buffer, buf_size, 0);
     if (SOCKET_ERROR == result) {
@@ -22,24 +22,41 @@ int SocketConnection::send_buffer(char *buffer, uint16_t buf_size) {
     return result;
 }
 
-#define DEFAULT_BUFLEN 512
 
-int SocketConnection::recv_data() {
+int SocketConnection::recv_data(char *recvbuf, int max_bufsize, int *recvsize) {
     int result;
-    char recvbuf[DEFAULT_BUFLEN];
-    int recvbuflen = DEFAULT_BUFLEN;
+    int read_bytes = 0;
+    uint16_t buf_size = 0;
+
+    result = recv(conn_socket, (char *)&buf_size, sizeof(buf_size), 0);
+    // Connection closed
+    if (0 == result) {
+        return -2;
+    }
+    if (result < 0) {
+        printf("recv failed with error: %d\n", WSAGetLastError());
+        return -1;
+    }
+    if ((result != sizeof(buf_size)) || (buf_size > max_bufsize)) {
+        printf("Invalid message\n");
+        return -3;
+    }
+//    printf("Should receive %d bytes\n", buf_size);
 
     // Receive until the peer closes the connection
-    do {
-
-        result = recv(conn_socket, recvbuf, recvbuflen, 0);
-        if (0 < result)
-            printf("Bytes received: %d\n", result);
-        else if (0 == result)
-            printf("Connection closed\n");
-        else
+    while(buf_size > read_bytes) {
+        result = recv(conn_socket, recvbuf + read_bytes, buf_size - read_bytes, 0);
+        // Connection closed
+        if (0 == result) {
+            return -2;
+        }
+        if (0 > result) {
             printf("recv failed with error: %d\n", WSAGetLastError());
+            return -1;
+        }
+        read_bytes += result;
+    }
 
-    } while(0 < result);
+    *recvsize = buf_size;
     return 0;
 }
