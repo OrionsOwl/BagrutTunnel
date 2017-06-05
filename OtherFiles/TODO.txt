@@ -1,0 +1,31 @@
+# Basic Network #######
+* organizing communication - client <-> server
+* manage pascal string format.
+* define protocol file: V
+
+## Client Side
+
+
+## Server Side
+# Parser -> function that returns command_t ()
+Command -> class (interface [simple])
+
+# Handlers:
+switch on command_type:
+handling each command
+
+implementing every handler
+
+Connections data structure
+class ConnectionHandler {
+	ip_t ip;
+	int8_t interface;
+	prot_socket;
+	
+	public:
+		establish_connection();
+		communicate();
+	
+}
+
+https://www.example-code.com/vcpp/ssh_quick_shell_session.asp
