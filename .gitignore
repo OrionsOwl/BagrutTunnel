@@ -4,3 +4,4 @@ Server/cmake-build-debug/CMakeFiles/
 *.exe
 Client/cmake-build-debug/
 Server/cmake-build-debug/
+libssh-0.7.5/
