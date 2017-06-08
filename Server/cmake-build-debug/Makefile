@@ -122,6 +122,33 @@ Server/fast:
 	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/build
 .PHONY : Server/fast
 
+SSHConnection.obj: SSHConnection.cpp.obj
+
+.PHONY : SSHConnection.obj
+
+# target to build an object file
+SSHConnection.cpp.obj:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/SSHConnection.cpp.obj
+.PHONY : SSHConnection.cpp.obj
+
+SSHConnection.i: SSHConnection.cpp.i
+
+.PHONY : SSHConnection.i
+
+# target to preprocess a source file
+SSHConnection.cpp.i:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/SSHConnection.cpp.i
+.PHONY : SSHConnection.cpp.i
+
+SSHConnection.s: SSHConnection.cpp.s
+
+.PHONY : SSHConnection.s
+
+# target to generate assembly for a file
+SSHConnection.cpp.s:
+	$(MAKE) -f CMakeFiles\Server.dir\build.make CMakeFiles/Server.dir/SSHConnection.cpp.s
+.PHONY : SSHConnection.cpp.s
+
 Server.obj: Server.cpp.obj
 
 .PHONY : Server.obj
@@ -212,6 +239,9 @@ help:
 	@echo ... Server
 	@echo ... edit_cache
 	@echo ... rebuild_cache
+	@echo ... SSHConnection.obj
+	@echo ... SSHConnection.i
+	@echo ... SSHConnection.s
 	@echo ... Server.obj
 	@echo ... Server.i
 	@echo ... Server.s
