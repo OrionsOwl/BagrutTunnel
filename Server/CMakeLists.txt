@@ -3,7 +3,7 @@ project(Server)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp Server.cpp Server.h SocketConnection.cpp SocketConnection.h)
+set(SOURCE_FILES main.cpp Server.cpp Server.h SocketConnection.cpp SocketConnection.h SSHConnection.cpp SSHConnection.h)
 add_executable(Server ${SOURCE_FILES})
 
 if(MINGW)
