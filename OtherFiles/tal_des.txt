@@ -1,0 +1,65 @@
+Commands:
+- list_interface
+- open < index, type >
+- close < index, type >
+- communicate < index, type, data >
+- query_interface < index >
+
+# Afterwards
+- server_command < data >
+
+Client:
+- connect < ip, port > (as part of init?)
+- close <>
+- send < string, length > (pascal string)
+- recieve < > (pascal string)
+
+Server: (should think of scalability for multi-client)
+- get_connection < is_blocked > (not part of init, for reconnecting)
+- send < string, length > (pascal string)
+- recieve < > (pascal string)
+- is_open()
+
+Commander (client):
+# supply interface for commands
+- server_command < command_type, char *data >
+- connect < index, type >
+- disconnect < index, type >
+
+TunnelHandler (server):
+# contains handlers for the various commands
+ctor: create the list of interfaces (empty map)
+Handlers: List[Map <type, handler>]
+- recv
+- parse
+- handler / system
+
+
+#### Handlers
+ConnectionHandler:
+# Represent the ConnectionInterface
+- communicate < data >
+
+SSHConnection (ConnectionHandler):
+# keeps the handler
+- communicate
+
+FTPConnection (ConnectionHandler):
+pass
+
+TelnetConnection (ConnectionHandler):
+
+
+
+#############################################
+כנראה שהצעדים הבאים יהיו:
+## - יצירת קובץ proto שמגדיר את המבנה הפרוטוקול ו"קימפולו" לקבצי cc ו-h.
+- יצירת מעטפת שימוש נוחה בפרוטוקול:
+    * צד קליינט: יצירת הודעות ושליחתן.
+    * צד שרת: קבלת הודעות ופירסורן.
+- מימוש פונקציונליות צד לקוח:
+    * קבלת בקשה מהלקוח (כנראה באיזה command line בתור התחלה) והעברה לפונקציית הבנייה המתאימה - שיצרנו בנקודה הקודמת.
+- מימוש פונקציונליות צד שרת:
+    * בהתאם לפרוטוקול שהגדרנו מימוש הפונקציונליות לכל סוג של הודעה.
+
+כנראה שנרצה לעשות את זה בהדרגה - הגדרנו כבר את הפרוטוקול - אז נרצה לראות מימוש פונקציונליות אחת אחרי השניה.

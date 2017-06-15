@@ -1,4 +1,17 @@
 Commands:
+- get_interfaces
+- initiate connection < index, type >
+- communicate < index, type, data >
+	- ssh/ telnet: data = command -> reply
+	- ftp: file_location -> file (TODO)
+- close < index, type >
+- query_interface < index > -> list of types (comma delimited)
+
+Request {
+	
+
+
+Commands:
 - open < index, type >
 - close < index, type >
 - communicate < index, type, data >
