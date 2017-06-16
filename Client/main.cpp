@@ -36,6 +36,34 @@ int test_client_connection() {
     return 0;
 }
 
+#define MENU_TABLE \
+    MENU_ITEM(IFS_LIST, "interface list", list_cmd_handler) \
+    MENU_ITEM(CONNECT_IFS, "connect to machine", connect_cmd_handler) \
+    MENU_ITEM(DISCONNECT_IFS, "disconnect from machine", disconnect_cmd_handler) \
+    MENU_ITEM(COMMUNICATE_IFS, "talk to machine", communicate_cmd_handler) \
+    MENU_ITEM(QUERY_IFS, "query interface", query_cmd_handler) \
+    MENU_ITEM(EXIT, "exit", exit_cmd_handler) \
+    MENU_ITEM(NUM_ITEMS, "", NULL)
+
+#define MENU_ITEM(item_num, item_str, handler) item_num,
+typedef enum option_e {
+    MENU_TABLE
+} option_t;
+#undef MENU_ITEM
+
+#define MENU_ITEM(item_num, item_str, handler) item_str,
+char *options_str[] = {
+        MENU_TABLE
+};
+#undef MENU_ITEM
+
+typedef int(*cmd_handler)(void);
+
+#define MENU_ITEM(item_num, item_str, handler) handler,
+cmd_handler cmd_handlers[] = {
+        MENU_TABLE
+};
+#undef MENU_ITEM
 
 
 //#define INTERFACES_TABLE \
@@ -64,14 +92,14 @@ int test_client_connection() {
 //a = 1;
 //p = "Jennifer";
 
-typedef struct ETH1{int inner1;};
+typedef struct ETH1{int inner1=1;}eth1_t;
 //should be a #define?
 
-typedef struct ETH2{int inner2; int inner3;};
+typedef struct ETH2{int inner2=2; int inner3=3;}eth2_t;
 
 typedef union INTERFACES{
-    ETH1;
-    ETH2;
+    eth1_t.inner1=1;
+    eth2_t;
 
 }interfaces_t;
 
@@ -79,6 +107,7 @@ int list_cmd_handler() {
     printf("Performing interface list*******************\n");
     printf("Which interface do you choice?\n");
 
+    int choice = 0;
     for(int i=1; i<3;i++)
     {
         printf(i,"eth",i);
@@ -91,9 +120,9 @@ int list_cmd_handler() {
             scanf("%d", &choice);
             switch(&choice) {
                 case 1:
-                    printf(ETH1.inner1);
+                    printf(eth1_t.inner1);
                 case 2  :
-                    conntinue; //what does it need to do?
+                    printf("");//what does it need to do?
             }
 
         case 2  :
@@ -101,11 +130,11 @@ int list_cmd_handler() {
             scanf("%d", &choice);
             switch(&choice) {
                 case 1:
-                    printf(ETH2.inner2);
+                    printf(eth2_t.inner2);
                 case 2:
-                    printf(ETH2.inner3);
+                    printf(eth2_t.inner3);
                 case 3  :
-                    conntinue; //what does it need to do?
+                    printf("");//what does it need to do?
             }
     }
    return 0;
@@ -117,10 +146,11 @@ int connect_cmd_handler() {
     // Waiting time
     // raise exception!!!
     printf("Connection created!\n What do you want to do?\n");
-    for (i = 0; i < NUM_ITEMS; i ++) {
+    for (int i = 0; i < NUM_ITEMS; i ++) {
         if(3== i || 4==i)
         printf("%d. %s.\n", i+1, options_str[i]);
     }
+    int choice =0;
     scanf("%d", &choice);
     switch(&choice) {
         case COMMUNICATE_IFS  :
@@ -137,11 +167,12 @@ int disconnect_cmd_handler() {
     // Waiting time
     // raise exception!!!
     printf("Are you sure you want to disconnect?\n 1.No\n 2.Yes\n");
+    int choice=0;
     scanf("%d", &choice);
     // raise exception!!!
     switch(&choice) {
         case 1  :
-            conntinue;
+            //what to do?
         case 2  :
             list_cmd_handler();
     }
@@ -168,11 +199,12 @@ int query_cmd_handler() {
 
 int exit_cmd_handler() {
     printf("Are you sure you want to exit?\n 1.No\n 2.Yes\n");
+    int choice=0;
     scanf("%d", &choice);
     // raise exception!!!
     switch(&choice) {
         case 1  :
-            conntinue;
+            //what to do?
         case 2  :
             list_cmd_handler();
     }
@@ -180,34 +212,7 @@ int exit_cmd_handler() {
     return 0;
 }
 
-#define MENU_TABLE \
-    MENU_ITEM(IFS_LIST, "interface list", list_cmd_handler) \
-    MENU_ITEM(CONNECT_IFS, "connect to machine", connect_cmd_handler) \
-    MENU_ITEM(DISCONNECT_IFS, "disconnect from machine", disconnect_cmd_handler) \
-    MENU_ITEM(COMMUNICATE_IFS, "talk to machine", communicate_cmd_handler) \
-    MENU_ITEM(QUERY_IFS, "query interface", query_cmd_handler) \
-    MENU_ITEM(EXIT, "exit", exit_cmd_handler) \
-    MENU_ITEM(NUM_ITEMS, "", NULL)
 
-#define MENU_ITEM(item_num, item_str, handler) item_num,
-typedef enum option_e {
-    MENU_TABLE
-} option_t;
-#undef MENU_ITEM
-
-#define MENU_ITEM(item_num, item_str, handler) item_str,
-char *options_str[] = {
-    MENU_TABLE
-};
-#undef MENU_ITEM
-
-typedef int(*cmd_handler)(void);
-
-#define MENU_ITEM(item_num, item_str, handler) handler,
-cmd_handler cmd_handlers[] = {
-        MENU_TABLE
-};
-#undef MENU_ITEM
 
 
 int tunnel_menu() {
