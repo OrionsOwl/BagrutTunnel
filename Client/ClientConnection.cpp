@@ -2,31 +2,27 @@
 // Created by user on 27/04/2017.
 //
 
-#include <cstdio>
-#include "Client.h"
+#include <iostream>
+#include "ClientConnection.h"
 
-Client::Client(const char *host_name, const char *port_name) {
-    int socket_res;
+
+ClientConnection::ClientConnection(string host_name, string port_name) {
     WSADATA wsaData;
 
     // Initialize Winsock
-    socket_res = WSAStartup(MAKEWORD(2,2), &wsaData);
+    int socket_res = WSAStartup(MAKEWORD(2,2), &wsaData);
     if (0 != socket_res) {
-        printf("WSAStartup failed with error: %d\n", socket_res);
-        /* raise Exception */
+        throw "WSAStartup failed with error: " + socket_res;
     }
 
     connect_socket(host_name, port_name);
 }
 
-Client::~Client() {
-    int socket_res;
-
+ClientConnection::~ClientConnection() {
     if (INVALID_SOCKET != conn_socket) {
         // shutdown the connection since we're done
-        socket_res = shutdown(conn_socket, SD_SEND);
-        if (socket_res == SOCKET_ERROR) {
-            printf("shutdown failed with error: %d\n", WSAGetLastError());
+        if (SOCKET_ERROR == shutdown(conn_socket, SD_SEND)) {
+            cout << "shutdown failed with error: " << WSAGetLastError() << endl;
         }
         closesocket(conn_socket);
         conn_socket = INVALID_SOCKET;
@@ -34,7 +30,7 @@ Client::~Client() {
     WSACleanup();
 }
 
-int Client::connect_socket(const char *hostname, const char *port_name) {
+void ClientConnection::connect_socket(string hostname, string port_name) {
     int socket_res;
     struct addrinfo *result = NULL, *ptr = NULL, hints;
 
@@ -44,20 +40,17 @@ int Client::connect_socket(const char *hostname, const char *port_name) {
     hints.ai_protocol = IPPROTO_TCP;
 
     // Resolve the server address and port
-    socket_res = getaddrinfo(hostname, port_name, &hints, &result);
+    socket_res = getaddrinfo(hostname.c_str(), port_name.c_str(), &hints, &result);
     if (0 != socket_res) {
-        printf("getaddrinfo failed with error: %d\n", socket_res);
-        return 1;
+        throw "getaddrinfo failed with error: " + socket_res;
     }
 
     // Attempt to connect to an address until one succeeds
     for(ptr=result; NULL != ptr; ptr=ptr->ai_next) {
-
         // Create a SOCKET for connecting to server
         conn_socket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
         if (INVALID_SOCKET == conn_socket) {
-            printf("socket failed with error: %d\n", WSAGetLastError());
-            return 1;
+            throw "socket failed with error: " + WSAGetLastError();
         }
 
         // Connect to server.
@@ -73,8 +66,19 @@ int Client::connect_socket(const char *hostname, const char *port_name) {
     freeaddrinfo(result);
 
     if (INVALID_SOCKET == conn_socket) {
-        printf("Unable to connect to server!\n");
-        return 1;
+        throw "Unable to connect to server!";
     }
-    return 0;
 }
+
+#define MAX_BUFFER_SIZE (1024)
+
+void ClientConnection::send_and_receive(TunnelCommand *cmd) {
+    char buf[MAX_BUFFER_SIZE];
+
+    int buf_size = cmd->serialize((byte_t*)buf, MAX_BUFFER_SIZE);
+    int written_bytes = send_buffer(buf, buf_size);
+    cout << "Written bytes: " << written_bytes << endl;
+    buf_size = recv_data(buf, (size_t)MAX_BUFFER_SIZE);
+    TunnelCommandResult *res = parse_command_result((byte_t*)buf, (size_t)buf_size);
+    cout << res->get_type() << endl;
+};

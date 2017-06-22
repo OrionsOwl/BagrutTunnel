@@ -2,28 +2,27 @@
 // Created by user on 27/04/2017.
 //
 
-#include <cstdio>
+#include <iostream>
 #include "SocketConnection.h"
 
-int SocketConnection::send_buffer(char *buffer, uint16_t buf_size) {
+using namespace std;
+
+int SocketConnection::send_buffer(char *buffer, size_t buf_size) {
     int result;
 
-    result = send(conn_socket, (char *)&buf_size, sizeof(buf_size), 0);
-    if (SOCKET_ERROR == result) {
-        printf("send failed with error: %d\n", WSAGetLastError());
-        return -1;
+    if (SOCKET_ERROR == send(conn_socket, (char *)&buf_size, sizeof(buf_size), 0)) {
+        throw "send failed with error: " + WSAGetLastError();
     }
 
     result = send(conn_socket, buffer, buf_size, 0);
     if (SOCKET_ERROR == result) {
-        printf("send failed with error: %d\n", WSAGetLastError());
-        return -1;
+        throw "send failed with error: " + WSAGetLastError();
     }
     return result;
 }
 
 
-int SocketConnection::recv_data(char *recvbuf, int max_bufsize, int *recvsize) {
+int SocketConnection::recv_data(char *recvbuf, size_t max_bufsize) {
     int result;
     int read_bytes = 0;
     uint16_t buf_size = 0;
@@ -31,32 +30,29 @@ int SocketConnection::recv_data(char *recvbuf, int max_bufsize, int *recvsize) {
     result = recv(conn_socket, (char *)&buf_size, sizeof(buf_size), 0);
     // Connection closed
     if (0 == result) {
-        return -2;
-    }
-    if (result < 0) {
-        printf("recv failed with error: %d\n", WSAGetLastError());
         return -1;
     }
-    if ((result != sizeof(buf_size)) || (buf_size > max_bufsize)) {
-        printf("Invalid message\n");
-        return -3;
+    if (0 > result) {
+        throw "recv failed with error: " + WSAGetLastError();
     }
-//    printf("Should receive %d bytes\n", buf_size);
+    if ((result != sizeof(buf_size)) || (buf_size > max_bufsize)) {
+        throw "invalid message";
+    }
+//    cout <<Trissmitp!
+// "Should receive " << buf_size << " bytes" << endl;
 
     // Receive until the peer closes the connection
     while(buf_size > read_bytes) {
         result = recv(conn_socket, recvbuf + read_bytes, buf_size - read_bytes, 0);
         // Connection closed
         if (0 == result) {
-            return -2;
+            return -1;
         }
         if (0 > result) {
-            printf("recv failed with error: %d\n", WSAGetLastError());
-            return -1;
+            throw "recv failed with error: " + WSAGetLastError();
         }
         read_bytes += result;
     }
 
-    *recvsize = buf_size;
-    return 0;
+    return buf_size;
 }

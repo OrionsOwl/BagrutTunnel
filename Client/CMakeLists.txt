@@ -3,7 +3,11 @@ project(Client)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp Client.cpp Client.h SocketConnection.cpp SocketConnection.h)
+set(SOURCE_FILES main.cpp
+        SocketConnection.cpp SocketConnection.h
+        ClientConnection.cpp ClientConnection.h
+        TunnelCommand.cpp TunnelCommand.h
+        TunnelCommandResult.cpp TunnelCommandResult.h)
 add_executable(Client ${SOURCE_FILES})
 
 if(MINGW)
