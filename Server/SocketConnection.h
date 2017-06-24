@@ -21,8 +21,8 @@ class SocketConnection {
 protected:
     SOCKET conn_socket = INVALID_SOCKET;
 public:
-    virtual int send_buffer(char *buffer, size_t buf_size);
-    virtual int recv_data(char *recvbuf, size_t max_bufsize);
+    int send_buffer(char *buffer, size_t buf_size);
+    int recv_data(char *recvbuf, size_t max_bufsize);
 };
 
 

@@ -3,7 +3,7 @@
 //
 
 #include <string.h>
-#include "TunnelCommand.h"
+#include "TunnelRequest.h"
 
 ostream& operator<<(ostream& os, const ComputerID& ch) {
     os << ch.host;
@@ -25,7 +25,7 @@ ComputerID::ComputerID(char *raw_data) {
 }
 
 
-size_t TunnelCommand::serialize(byte_t *buf, size_t buf_size) {
+size_t TunnelRequest::serialize(byte_t *buf, size_t buf_size) {
     size_t needed_size = sizeof(cmd_type);
     if (needed_size > buf_size) {
         throw length_error("Buff size is not sufficient");
@@ -35,73 +35,75 @@ size_t TunnelCommand::serialize(byte_t *buf, size_t buf_size) {
 }
 
 
-size_t ConnectionCommand::serialize(byte_t *buf, size_t buf_size) {
+size_t ConnectionRequest::serialize(byte_t *buf, size_t buf_size) {
     size_t needed_size = sizeof(conn);
     if (needed_size > buf_size) {
         throw length_error("Buff size is not sufficient");
     }
-    size_t res = TunnelCommand::serialize(buf, buf_size - needed_size);
+    size_t res = TunnelRequest::serialize(buf, buf_size - needed_size);
     memmove(buf + res, &conn, sizeof(conn));
     return res + needed_size;
 }
 
 
-size_t CommunicateConnectionCommand::serialize(byte_t *buf, size_t buf_size) {
+size_t CommunicateConnectionRequest::serialize(byte_t *buf, size_t buf_size) {
     size_t needed_size = command.length();
     if (needed_size > buf_size) {
         throw length_error("Buff size is not sufficient");
     }
-    size_t res = ConnectionCommand::serialize(buf, buf_size - needed_size);
+    size_t res = ConnectionRequest::serialize(buf, buf_size - needed_size);
     memmove(buf + res, command.c_str(), needed_size);
     return res + needed_size;
 }
 
 
-size_t QueryInterfaceCommand::serialize(byte_t *buf, size_t buf_size) {
+size_t QueryInterfaceRequest::serialize(byte_t *buf, size_t buf_size) {
     size_t needed_size = sizeof(ifs);
     if (needed_size > buf_size) {
         throw length_error("Buff size is not sufficient");
     }
-    size_t res = TunnelCommand::serialize(buf, buf_size - needed_size);
+    size_t res = TunnelRequest::serialize(buf, buf_size - needed_size);
     memmove(buf + res, &ifs, needed_size);
     return res + needed_size;
 }
 
 
-TunnelCommand* parse_command(byte_t *cmd, size_t command_size) {
-    if (TunnelCommand::get_size() > command_size) {
+TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
+    if (TunnelRequest::get_size() > command_size) {
         throw length_error("Command has invalid length");
     }
-    command_type_t cmd_type = (command_type_t)cmd[0];
-    cmd += sizeof(command_type_t);
-
+    request_type_t cmd_type;
+    memmove(&cmd_type, cmd, sizeof(request_type_t));
+//    request_type_t cmd_type = (request_type_t)*cmd;
+    cmd += sizeof(request_type_t);
+    cout << "Received command: " << cmd_type << endl;
     switch (cmd_type) {
         case LIST_INTERFACES:
-            if (ListInterfaceCommand::get_size() != command_size) {
+            if (ListInterfaceRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
             }
-            return new ListInterfaceCommand();
+            return new ListInterfaceRequest();
         case QUERY_INTERFACE:
-            if (QueryInterfaceCommand::get_size() != command_size) {
+            if (QueryInterfaceRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
             }
-            return new QueryInterfaceCommand((uint8_t)cmd[0]);
+            return new QueryInterfaceRequest((uint8_t)cmd[0]);
         case OPEN_CONNECTION:
-            if (OpenConnectionCommand::get_size() != command_size) {
+            if (OpenConnectionRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
             }
-            return new OpenConnectionCommand(ComputerID((char*)cmd));
+            return new OpenConnectionRequest(ComputerID((char*)cmd));
         case CLOSE_CONNECTION:
-            if (CloseConnectionCommand::get_size() != command_size) {
+            if (CloseConnectionRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
             }
-            return new CloseConnectionCommand(ComputerID((char*)cmd));
+            return new CloseConnectionRequest(ComputerID((char*)cmd));
         case COMMUNICATE_CONNECTION:
-            if (CommunicateConnectionCommand::get_size() > command_size) {
+            if (CommunicateConnectionRequest::get_size() > command_size) {
                 throw length_error("Command has invalid length");
             }
-            cmd[command_size - sizeof(command_type_t)] = '\0';
-            return new CommunicateConnectionCommand(ComputerID((char*)cmd), string((char*)cmd + sizeof(ComputerID)));
+            cmd[command_size - sizeof(request_type_t)] = '\0';
+            return new CommunicateConnectionRequest(ComputerID((char*)cmd), string((char*)cmd + sizeof(ComputerID)));
         default:
             throw invalid_argument("Invalid command type");
     }

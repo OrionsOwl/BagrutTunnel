@@ -72,13 +72,13 @@ void ClientConnection::connect_socket(string hostname, string port_name) {
 
 #define MAX_BUFFER_SIZE (1024)
 
-void ClientConnection::send_and_receive(TunnelCommand *cmd) {
+void ClientConnection::send_and_receive(TunnelRequest *cmd) {
     char buf[MAX_BUFFER_SIZE];
 
     int buf_size = cmd->serialize((byte_t*)buf, MAX_BUFFER_SIZE);
     int written_bytes = send_buffer(buf, buf_size);
     cout << "Written bytes: " << written_bytes << endl;
     buf_size = recv_data(buf, (size_t)MAX_BUFFER_SIZE);
-    TunnelCommandResult *res = parse_command_result((byte_t*)buf, (size_t)buf_size);
+    TunnelResponse *res = parse_response((byte_t*)buf, (size_t)buf_size);
     cout << res->get_type() << endl;
 };

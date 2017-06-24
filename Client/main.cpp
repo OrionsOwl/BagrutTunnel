@@ -5,7 +5,8 @@
 #include <iostream>
 
 #include "ClientConnection.h"
-#include "TunnelCommand.h"
+#include "TunnelRequest.h"
+#include <limits>
 
 using namespace std;
 
@@ -20,6 +21,7 @@ bool verify_exit_choice() {
     cout << "2. No" << endl;
     int choice = 0;
     cin >> choice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     return choice == 1;
 }
 
@@ -34,6 +36,7 @@ uint8_t get_interface_from_user() {
 //        cout << i + 1 << ". " << interfaces[i] << endl;
 //    }
     cin >> ifs;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 //    if (ifs > interfaces->length()) {
 //        cout << "Invalid interface choice" << endl;
 //        throw ;
@@ -53,52 +56,39 @@ string get_host_from_user() {
     return host;
 }
 
-ComputerID* query_connection(){
+ComputerID query_connection(){
     string host = get_host_from_user();
     uint8_t ifs = get_interface_from_user();
-    return new ComputerID(host, ifs);
+    return ComputerID(host, ifs);
 }
 
-TunnelCommand* list_cmd_handler() { //TODO: check where to initialize the interface
-    return new ListInterfaceCommand();
+TunnelRequest* list_cmd_handler() { //TODO: check where to initialize the interface
+    return new ListInterfaceRequest();
 }
 
 
-TunnelCommand* communicate_cmd_handler() {
-    ComputerID *id = query_connection();
+TunnelRequest* communicate_cmd_handler() {
+    ComputerID id = query_connection();
     cout << "Enter command: " << endl;
     string command;
-    cin >> command;
-    return new CommunicateConnectionCommand(*id, command);
+    getline(cin, command);
+    return new CommunicateConnectionRequest(id, command);
 }
 
-TunnelCommand* query_cmd_handler() {
+TunnelRequest* query_cmd_handler() {
     uint8_t ifs = get_interface_from_user();
-    return new QueryInterfaceCommand(ifs);
+    return new QueryInterfaceRequest(ifs);
 }
 
-TunnelCommand* connect_cmd_handler() {
-    ComputerID *id = query_connection();
-    return new OpenConnectionCommand(*id);
+TunnelRequest* connect_cmd_handler() {
+    ComputerID id = query_connection();
+    return new OpenConnectionRequest(id);
 }
 
-TunnelCommand* disconnect_cmd_handler() {
-    ComputerID *id = query_connection();
-    return new CloseConnectionCommand(*id);
+TunnelRequest* disconnect_cmd_handler() {
+    ComputerID id = query_connection();
+    return new CloseConnectionRequest(id);
 }
-
-
-//class MenuUser {
-//private:
-//    ComputerID *id;
-//public:
-//    MenuUser();
-//    void bla() {
-//        while (true) {
-//
-//        }
-//    }
-//};
 
 
 #define MENU_TABLE \
@@ -122,7 +112,7 @@ char *options_str[] = {
 };
 #undef MENU_ITEM
 
-typedef TunnelCommand* (*cmd_handler)(void);
+typedef TunnelRequest* (*cmd_handler)(void);
 
 #define MENU_ITEM(item_num, item_str, handler) handler,
 cmd_handler cmd_handlers[] = {
@@ -130,7 +120,7 @@ cmd_handler cmd_handlers[] = {
 };
 #undef MENU_ITEM
 
-TunnelCommand* tunnel_menu() {
+TunnelRequest* tunnel_menu() {
     int choice = 0;
 
     while (true) {
@@ -139,6 +129,8 @@ TunnelCommand* tunnel_menu() {
             cout << i + 1 << ". " << options_str[i] << endl;
         }
         cin >> choice;
+        // Ignore to the end of file
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         choice -= 1;
         if (EXIT == choice) {
             if (verify_exit_choice()) {
@@ -156,7 +148,7 @@ TunnelCommand* tunnel_menu() {
 }
 
 
-//void send_and_receive_command(TunnelCommand *cmd, ) {
+//void send_and_receive_command(TunnelRequest *cmd, ) {
 //    //        CommunicateConnectionCommand *upcmd = (CommunicateConnectionCommand*)cmd;
 //    int buf_size = cmd->serialize((byte_t*)buf, MAX_BUFFER_SIZE);
 //    int written_bytes = conn.send_buffer(buf, (size_t)buf_size);
@@ -173,14 +165,14 @@ void run(string server_name, string port) {
     ClientConnection conn(server_name, port);
 
     while (true) {
-        TunnelCommand *cmd = tunnel_menu();
+        TunnelRequest *cmd = tunnel_menu();
         if (NULL == cmd) {
             cout << "Bye bye" << endl;
             break;
         }
         if (OPEN_CONNECTION == cmd->get_type()) {
-            TunnelCommand *cur_cmd = NULL;
-            OpenConnectionCommand *open_cmd = (OpenConnectionCommand*)cmd;
+            TunnelRequest *cur_cmd = NULL;
+            OpenConnectionRequest *open_cmd = (OpenConnectionRequest*)cmd;
             ComputerID *current_id = open_cmd->get_conn_id();
             string command;
             should_continue = true;
@@ -190,10 +182,10 @@ void run(string server_name, string port) {
                 cout << *current_id << ": ";
                 getline(cin, command);
                 if ("exit" == command) {
-                    cur_cmd = new CloseConnectionCommand(*current_id);
+                    cur_cmd = new CloseConnectionRequest(*current_id);
                     should_continue = false;
                 } else {
-                    cur_cmd = new CommunicateConnectionCommand(*current_id, command);
+                    cur_cmd = new CommunicateConnectionRequest(*current_id, command);
                 }
                 conn.send_and_receive(cur_cmd);
             }
@@ -202,24 +194,35 @@ void run(string server_name, string port) {
     }
 }
 
+void change_console_echo_mode() {
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD mode = 0;
+    GetConsoleMode(hStdin, &mode);
+    SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
+}
+
 int __cdecl main(int argc, char **argv) {
     // Validate the parameters
     if (argc != 3) {
         printf("usage: %s <server_name> <port>\n", argv[0]);
         return 1;
     }
-    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD mode = 0;
-    GetConsoleMode(hStdin, &mode);
-    SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
-
-//    string a;
-//    cout << "Press me:  ";
-//    getline(cin, a);
-//    cout << "Entered: " << a;
+    change_console_echo_mode();
     run(argv[1], argv[2]);
-//    test_client_connection();
-//    ComputerID *current_id = new ComputerID("blabla", 123);
-//    cout << *current_id << ": ";
+    return 0;
+}
+
+int __cdecl main1(int argc, char **argv) {
+    int buf_len;
+    byte_t buf[MAX_BUFFER_SIZE];
+
+    ClientConnection conn("localhost", "7777");
+
+    CommunicateConnectionRequest *cmd = new CommunicateConnectionRequest(ComputerID("localhost", 2), "bla bla");
+    int buf_size = cmd->serialize(buf, MAX_BUFFER_SIZE);
+    conn.send_buffer((char*)buf, (size_t)buf_size);
+//    TunnelRequest *pcmd = parse_command(buf, buf_size);
+//    cout << pcmd->get_type() << endl;
+
     return 0;
 }

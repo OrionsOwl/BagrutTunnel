@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES main.cpp
         SocketConnection.cpp SocketConnection.h
         ClientConnection.cpp ClientConnection.h
-        TunnelCommand.cpp TunnelCommand.h
-        TunnelCommandResult.cpp TunnelCommandResult.h)
+        TunnelRequest.cpp TunnelRequest.h
+        TunnelResponse.cpp TunnelResponse.h)
 add_executable(Client ${SOURCE_FILES})
 
 if(MINGW)

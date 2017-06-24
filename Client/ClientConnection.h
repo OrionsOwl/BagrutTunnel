@@ -7,8 +7,8 @@
 
 #include <string>
 #include "SocketConnection.h"
-#include "TunnelCommand.h"
-#include "TunnelCommandResult.h"
+#include "TunnelRequest.h"
+#include "TunnelResponse.h"
 
 
 using namespace std;
@@ -20,7 +20,7 @@ private:
 public:
     ClientConnection(string host_name, string port_name);
     ~ClientConnection();
-    void send_and_receive(TunnelCommand *cmd);
+    void send_and_receive(TunnelRequest *cmd);
 };
 
 
