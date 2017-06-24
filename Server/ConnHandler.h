@@ -16,8 +16,8 @@ private:
     ComputerID o;
 
 public:
-    ConnHandler(ComputerID &o, bool should_connect): o(o) {};
-    ConnHandler(ComputerID &o): ConnHandler(o, false) {};
+    ConnHandler(ComputerID &_o, bool should_connect): o(_o) {};
+    ConnHandler(ComputerID &_o): ConnHandler(_o, false) {};
     ~ConnHandler();
     void connect();
     string communicate(string command);
@@ -25,6 +25,7 @@ public:
     bool operator< (const ConnHandler& other) const;
     bool operator== (const ConnHandler &other);
     bool operator!= (const ConnHandler &other);
+    ComputerID get_id() const { return o; };
     friend ostream& operator<<(ostream& os, const ConnHandler& ch);
 };
 

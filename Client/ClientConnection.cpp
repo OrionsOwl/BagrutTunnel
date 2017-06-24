@@ -73,12 +73,35 @@ void ClientConnection::connect_socket(string hostname, string port_name) {
 #define MAX_BUFFER_SIZE (1024)
 
 void ClientConnection::send_and_receive(TunnelRequest *cmd) {
+    TunnelResponse *res = NULL;
     char buf[MAX_BUFFER_SIZE];
 
     int buf_size = cmd->serialize((byte_t*)buf, MAX_BUFFER_SIZE);
-    int written_bytes = send_buffer(buf, buf_size);
-    cout << "Written bytes: " << written_bytes << endl;
+    send_buffer(buf, buf_size);
     buf_size = recv_data(buf, (size_t)MAX_BUFFER_SIZE);
-    TunnelResponse *res = parse_response((byte_t*)buf, (size_t)buf_size);
-    cout << res->get_type() << endl;
+    try {
+        res = parse_response((byte_t *) buf, (size_t) buf_size);
+    }catch (length_error err) {
+        cout << "Parse error: " << err.what() << endl;
+        return;
+    } catch (invalid_argument err) {
+        cout << "Parse error: " << err.what() << endl;
+        return;
+    }
+    switch (res->get_res_type()) {
+        case ACK_RESPONSE:
+            break;
+        case DATA_RESPONSE: {
+            DataResponse *data_res = (DataResponse *) res;
+            cout << data_res->get_data() << endl;
+            break;
+        }
+        case ERROR_RESPONSE: {
+            ErrorResponse *error_res = (ErrorResponse *) res;
+            cout << "Error: " << error_res->get_data() << endl;
+            break;
+        }
+        default:
+            cout << "Unknown response type: " << res->get_res_type() << endl;
+    }
 };

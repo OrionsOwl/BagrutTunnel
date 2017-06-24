@@ -30,11 +30,12 @@ TunnelResponse* parse_response(byte_t *cmd, size_t result_size) {
     if (TunnelResponse::get_size() > result_size) {
         throw length_error("Command result has invalid length");
     }
-    response_type_t res_type;
+    response_type_t res_type;// = (response_type_t)cmd[0];
     memmove(&res_type, cmd, sizeof(response_type_t));
     cmd += sizeof(response_type_t);
-    request_type_t cmd_type;
+    request_type_t cmd_type;// = (request_type_t)cmd[0];
     memmove(&cmd_type, cmd, sizeof(request_type_t));
+    cmd += sizeof(request_type_t);
 
     switch (res_type) {
         case ACK_RESPONSE:

@@ -23,7 +23,7 @@ void ConnHandler::connect() {
 }
 
 string ConnHandler::communicate(string command) {
-    cout << o.host << " sending commnad: " << command << endl;
+    cout << o << " sending commnad: " << command << endl;
     // TODO: really communicate
     return command + " sent";
 }

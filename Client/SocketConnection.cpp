@@ -25,7 +25,7 @@ int SocketConnection::send_buffer(char *buffer, size_t buf_size) {
 int SocketConnection::recv_data(char *recvbuf, size_t max_bufsize) {
     int result;
     int read_bytes = 0;
-    uint16_t buf_size = 0;
+    size_t buf_size = 0;
 
     result = recv(conn_socket, (char *)&buf_size, sizeof(buf_size), 0);
     // Connection closed

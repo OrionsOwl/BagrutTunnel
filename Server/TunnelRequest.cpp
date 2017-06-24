@@ -6,7 +6,7 @@
 #include "TunnelRequest.h"
 
 
-ComputerID::ComputerID(string host_name, uint8_t _ifs) {
+ComputerID::ComputerID(string host_name, int _ifs) {
     if (host_name.length() >= MAX_HOST_NAME) {
         throw std::length_error("Given host name is too long");
     }
@@ -17,8 +17,13 @@ ComputerID::ComputerID(string host_name, uint8_t _ifs) {
 }
 
 ComputerID::ComputerID(char *raw_data) {
-    ifs = (uint8_t)raw_data[0];
-    memmove(host, raw_data + sizeof(uint8_t), MAX_HOST_NAME);
+    ifs = (int)raw_data[0];
+    memmove(host, raw_data + sizeof(int), MAX_HOST_NAME);
+}
+
+ComputerID::ComputerID(const ComputerID &other) {
+    ifs = other.ifs;
+    memmove(host, other.host, MAX_HOST_NAME);
 }
 
 bool ComputerID::operator< (const ComputerID& other) const {
@@ -88,9 +93,8 @@ TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
     }
     request_type_t cmd_type;
     memmove(&cmd_type, cmd, sizeof(request_type_t));
-//    request_type_t cmd_type = (request_type_t)*cmd;
     cmd += sizeof(request_type_t);
-    cout << "Received command: " << cmd_type << endl;
+
     switch (cmd_type) {
         case LIST_INTERFACES:
             if (ListInterfaceRequest::get_size() != command_size) {
@@ -101,7 +105,7 @@ TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
             if (QueryInterfaceRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
             }
-            return new QueryInterfaceRequest((uint8_t)cmd[0]);
+            return new QueryInterfaceRequest((int)cmd[0]);
         case OPEN_CONNECTION:
             if (OpenConnectionRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
@@ -112,12 +116,17 @@ TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
                 throw length_error("Command has invalid length");
             }
             return new CloseConnectionRequest(ComputerID((char*)cmd));
-        case COMMUNICATE_CONNECTION:
+        case COMMUNICATE_CONNECTION: {
             if (CommunicateConnectionRequest::get_size() > command_size) {
                 throw length_error("Command has invalid length");
             }
             cmd[command_size - sizeof(request_type_t)] = '\0';
-            return new CommunicateConnectionRequest(ComputerID((char*)cmd), string((char*)cmd + sizeof(ComputerID)));
+            CommunicateConnectionRequest *tt = new CommunicateConnectionRequest(ComputerID((char *) cmd),
+                                                                                string((char *) cmd +
+                                                                                       sizeof(ComputerID)));
+            cout << "Command is: " << tt->get_command() << endl;
+            return tt;
+        }
         default:
             throw invalid_argument("Invalid command type");
     }

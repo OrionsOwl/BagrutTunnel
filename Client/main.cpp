@@ -11,8 +11,6 @@
 using namespace std;
 
 #define MAX_BUFFER_SIZE (1024)
-#define DEFAULT_PORT "27015"
-#define DEFAULT_HOST "localhost"
 
 
 bool verify_exit_choice() {
@@ -27,8 +25,8 @@ bool verify_exit_choice() {
 
 //string interfaces[] = {"eth0", "eth1",};
 
-uint8_t get_interface_from_user() {
-    uint8_t ifs;
+int get_interface_from_user() {
+    int ifs;
     cout << "Please choose interface " << endl;
     cout << "1. eth0" << endl;
     cout << "2. eth1" << endl;
@@ -41,7 +39,7 @@ uint8_t get_interface_from_user() {
 //        cout << "Invalid interface choice" << endl;
 //        throw ;
 //    }
-    return ifs;
+    return (int)ifs;
 }
 
 string get_host_from_user() {
@@ -51,14 +49,13 @@ string get_host_from_user() {
     getline(cin, host);
     if (host.length() > MAX_HOST_NAME) {
         cout << "Invalid host - should be no longer than " << MAX_HOST_NAME << " characters" << endl;
-//        throw ;
     }
     return host;
 }
 
 ComputerID query_connection(){
+    int ifs = get_interface_from_user();
     string host = get_host_from_user();
-    uint8_t ifs = get_interface_from_user();
     return ComputerID(host, ifs);
 }
 
@@ -76,7 +73,7 @@ TunnelRequest* communicate_cmd_handler() {
 }
 
 TunnelRequest* query_cmd_handler() {
-    uint8_t ifs = get_interface_from_user();
+    int ifs = get_interface_from_user();
     return new QueryInterfaceRequest(ifs);
 }
 
@@ -106,7 +103,7 @@ typedef enum option_e {
 } option_t;
 #undef MENU_ITEM
 
-#define MENU_ITEM(item_num, item_str, handler) item_str,
+#define MENU_ITEM(item_num, item_str, handler) (char*)item_str,
 char *options_str[] = {
         MENU_TABLE
 };
@@ -120,6 +117,21 @@ cmd_handler cmd_handlers[] = {
 };
 #undef MENU_ITEM
 
+int safe_get_number(int min_num, int max_num) {
+    int good_num;
+    cout << "Please enter a valid integer" << endl;
+    for(;;) {
+        if (cin >> good_num) {
+            if (min_num < good_num && good_num < max_num)
+                break;
+        }
+        cout << "Please enter a valid integer" << endl;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    return good_num;
+}
+
 TunnelRequest* tunnel_menu() {
     int choice = 0;
 
@@ -128,7 +140,7 @@ TunnelRequest* tunnel_menu() {
         for (int i = 0; i < NUM_ITEMS; i++) {
             cout << i + 1 << ". " << options_str[i] << endl;
         }
-        cin >> choice;
+        choice = safe_get_number(0, NUM_ITEMS + 1);
         // Ignore to the end of file
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         choice -= 1;
@@ -136,10 +148,13 @@ TunnelRequest* tunnel_menu() {
             if (verify_exit_choice()) {
                 return NULL;
             }
-//            choice = 0;
             continue;
         }
         if (choice >= NUM_ITEMS || choice < 0) {
+            if (cin.fail()) {
+                cin.clear();
+                cout << "Very bad input!" << endl;
+            }
             cout << "Bad choice: should enter a valid option" << endl;
             continue;
         }
@@ -148,20 +163,29 @@ TunnelRequest* tunnel_menu() {
 }
 
 
-//void send_and_receive_command(TunnelRequest *cmd, ) {
-//    //        CommunicateConnectionCommand *upcmd = (CommunicateConnectionCommand*)cmd;
-//    int buf_size = cmd->serialize((byte_t*)buf, MAX_BUFFER_SIZE);
-//    int written_bytes = conn.send_buffer(buf, (size_t)buf_size);
-//    cout << "Written bytes: " << written_bytes << endl;
-//    conn.recv_data(buf, (size_t)MAX_BUFFER_SIZE);
-//    cout << buf << endl;
-//}
-
-
-void run(string server_name, string port) {
-    char buf[MAX_BUFFER_SIZE];
+void open_user_session(ClientConnection &conn, OpenConnectionRequest *open_cmd) {
     bool should_continue;
 
+    TunnelRequest *cur_cmd = NULL;
+    ComputerID current_id = open_cmd->get_conn_id();
+    string command;
+    should_continue = true;
+
+    conn.send_and_receive(open_cmd);
+    while (should_continue) {
+        cout << current_id << ": ";
+        getline(cin, command);
+        if ("exit" == command || "quit" == command) {
+            cur_cmd = new CloseConnectionRequest(current_id);
+            should_continue = false;
+        } else {
+            cur_cmd = new CommunicateConnectionRequest(current_id, command);
+        }
+        conn.send_and_receive(cur_cmd);
+    }
+}
+
+void run(string server_name, string port) {
     ClientConnection conn(server_name, port);
 
     while (true) {
@@ -171,26 +195,10 @@ void run(string server_name, string port) {
             break;
         }
         if (OPEN_CONNECTION == cmd->get_type()) {
-            TunnelRequest *cur_cmd = NULL;
-            OpenConnectionRequest *open_cmd = (OpenConnectionRequest*)cmd;
-            ComputerID *current_id = open_cmd->get_conn_id();
-            string command;
-            should_continue = true;
-
-            conn.send_and_receive(open_cmd);
-            while (should_continue) {
-                cout << *current_id << ": ";
-                getline(cin, command);
-                if ("exit" == command) {
-                    cur_cmd = new CloseConnectionRequest(*current_id);
-                    should_continue = false;
-                } else {
-                    cur_cmd = new CommunicateConnectionRequest(*current_id, command);
-                }
-                conn.send_and_receive(cur_cmd);
-            }
+            open_user_session(conn, (OpenConnectionRequest*)cmd);
+        } else {
+            conn.send_and_receive(cmd);
         }
-        conn.send_and_receive(cmd);
     }
 }
 
@@ -207,13 +215,13 @@ int __cdecl main(int argc, char **argv) {
         printf("usage: %s <server_name> <port>\n", argv[0]);
         return 1;
     }
-    change_console_echo_mode();
+//    change_console_echo_mode();
     run(argv[1], argv[2]);
+//    int r = safe_get_number(2, 6);
     return 0;
 }
 
 int __cdecl main1(int argc, char **argv) {
-    int buf_len;
     byte_t buf[MAX_BUFFER_SIZE];
 
     ClientConnection conn("localhost", "7777");

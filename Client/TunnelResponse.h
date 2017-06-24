@@ -7,13 +7,11 @@
 
 #include "TunnelRequest.h"
 
-#pragma pack(1)
 typedef enum response_type_e {
     ACK_RESPONSE,
     ERROR_RESPONSE,
     DATA_RESPONSE,
 } response_type_t;
-#pragma unpack
 
 
 class TunnelResponse {

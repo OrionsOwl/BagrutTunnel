@@ -7,15 +7,15 @@
 
 using namespace std;
 
-void ConnSet::add(ConnHandler &conn) {
+void ConnSet::add(ConnHandler conn) {
     if (_find_entry(conn) != end()) {
         throw "Entry already exists";
     }
     conn.connect();
-//    insert(conn);
+    insert(conn);
 }
 
-void ConnSet::remove(ConnHandler &conn) {
+void ConnSet::remove(ConnHandler conn) {
     conn_set_iter it = _find_entry(conn);
     if (it == end()) {
         throw "Entry doesn't exist";
@@ -23,7 +23,7 @@ void ConnSet::remove(ConnHandler &conn) {
     erase(it);
 }
 
-ConnHandler ConnSet::get_entry(ConnHandler &conn) {
+ConnHandler ConnSet::get_entry(ConnHandler conn) {
     conn_set_iter it = _find_entry(conn);
     if (it == end()) {
         throw "Entry doesn't exist";

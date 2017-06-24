@@ -13,7 +13,7 @@
 
 
 class TunnelHandler {
-public://private:
+private:
     ServerConnection *conn;
     ConnSet connections;
 
@@ -32,7 +32,6 @@ public:
      */
     TunnelHandler(ServerConnection *conn): conn(conn) {};
     TunnelHandler(char *port): TunnelHandler(new ServerConnection(port)) {};
-//    ~TunnelHandler();
     /*
      * Executes the main loop of the Tunnel
      */

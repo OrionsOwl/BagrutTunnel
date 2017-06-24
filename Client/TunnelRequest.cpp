@@ -5,24 +5,38 @@
 #include <string.h>
 #include "TunnelRequest.h"
 
-ostream& operator<<(ostream& os, const ComputerID& ch) {
-    os << ch.host;
-    return os;
-}
 
-ComputerID::ComputerID(string host_name, uint8_t ifs): ifs(ifs) {
+ComputerID::ComputerID(string host_name, int _ifs) {
     if (host_name.length() >= MAX_HOST_NAME) {
         throw std::length_error("Given host name is too long");
     }
     memset(host, 0, MAX_HOST_NAME);
     memmove(host, host_name.c_str(), host_name.length());
     host[host_name.length()] = 0;
+    ifs = _ifs;
 }
 
 ComputerID::ComputerID(char *raw_data) {
-    ifs = (uint8_t)raw_data[0];
-    memmove(host, raw_data + 1, MAX_HOST_NAME);
+    ifs = (int)raw_data[0];
+    memmove(host, raw_data + sizeof(int), MAX_HOST_NAME);
 }
+
+bool ComputerID::operator< (const ComputerID& other) const {
+    if (ifs != other.ifs)
+        return ifs < other.ifs;
+    return bool(strcmp(host, other.host));
+}
+
+bool ComputerID::operator== (const ComputerID &other) {
+    return ifs == other.ifs && string(host) == string(other.host);
+}
+
+ostream& operator<<(ostream& os, const ComputerID& ch) {
+    os << "(" << ch.host << ", " << int(ch.ifs) << ")";
+    return os;
+}
+
+// ############################################
 
 
 size_t TunnelRequest::serialize(byte_t *buf, size_t buf_size) {
@@ -87,7 +101,7 @@ TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
             if (QueryInterfaceRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
             }
-            return new QueryInterfaceRequest((uint8_t)cmd[0]);
+            return new QueryInterfaceRequest((int)cmd[0]);
         case OPEN_CONNECTION:
             if (OpenConnectionRequest::get_size() != command_size) {
                 throw length_error("Command has invalid length");
