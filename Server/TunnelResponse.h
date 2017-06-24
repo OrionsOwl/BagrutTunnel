@@ -42,7 +42,7 @@ public:
     size_t serialize(byte_t *buf, size_t buf_size);
     string get_data() { return info; }
     void set_data(string data_info) { info = data_info; }
-    static size_t get_size() { return TunnelResponse::get_size() + 1; }
+    static size_t get_size() { return TunnelResponse::get_size(); }
 };
 
 class ErrorResponse: public StringResponse {

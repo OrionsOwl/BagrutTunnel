@@ -53,7 +53,7 @@ void test_requests() {
     int buf_len = 0;
     byte_t buf[SSS];
 
-    CommunicateConnectionRequest *cmd = new CommunicateConnectionRequest(ComputerID("localhost", 2), "bla bla");
+    CommunicateConnectionRequest *cmd = new CommunicateConnectionRequest(ComputerID("localhost", 2), "");
     int buf_size = cmd->serialize(buf, SSS);
     TunnelRequest *pcmd = parse_request(buf, (size_t)buf_size);
     CommunicateConnectionRequest *cmd1 = (CommunicateConnectionRequest*)pcmd;
@@ -64,5 +64,6 @@ void test_requests() {
 int __cdecl main(int argc, char **argv) {
     return real_main(argc, argv);
 //    test_conset();
+//    test_requests();
 //    return 0;
 }

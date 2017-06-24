@@ -20,6 +20,7 @@ struct ComputerID {
     char host[MAX_HOST_NAME];
     ComputerID(char *raw_data);
     ComputerID(string host_name, int _ifs);
+    ComputerID(const ComputerID &other);
     bool operator< (const ComputerID& other) const;
     bool operator== (const ComputerID &other);
     bool operator!= (const ComputerID &other) { return !(*this == other); }

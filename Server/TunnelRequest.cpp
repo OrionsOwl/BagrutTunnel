@@ -17,7 +17,8 @@ ComputerID::ComputerID(string host_name, int _ifs) {
 }
 
 ComputerID::ComputerID(char *raw_data) {
-    ifs = (int)raw_data[0];
+//    memcpy(this, raw_data, sizeof(*this));
+    memcpy(&ifs, raw_data, sizeof(int));
     memmove(host, raw_data + sizeof(int), MAX_HOST_NAME);
 }
 
@@ -66,12 +67,13 @@ size_t ConnectionRequest::serialize(byte_t *buf, size_t buf_size) {
 
 
 size_t CommunicateConnectionRequest::serialize(byte_t *buf, size_t buf_size) {
-    size_t needed_size = command.length();
+    size_t needed_size = command.length() + 1;
     if (needed_size > buf_size) {
         throw length_error("Buff size is not sufficient");
     }
     size_t res = ConnectionRequest::serialize(buf, buf_size - needed_size);
-    memmove(buf + res, command.c_str(), needed_size);
+    memmove(buf + res, command.c_str(), needed_size - 1);
+    buf[res + needed_size] = 0;
     return res + needed_size;
 }
 
@@ -120,7 +122,7 @@ TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
             if (CommunicateConnectionRequest::get_size() > command_size) {
                 throw length_error("Command has invalid length");
             }
-            cmd[command_size - sizeof(request_type_t)] = '\0';
+            cmd[command_size - sizeof(request_type_t) - 1] = '\0';
             CommunicateConnectionRequest *tt = new CommunicateConnectionRequest(ComputerID((char *) cmd),
                                                                                 string((char *) cmd +
                                                                                        sizeof(ComputerID)));

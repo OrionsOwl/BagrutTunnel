@@ -17,8 +17,14 @@ ComputerID::ComputerID(string host_name, int _ifs) {
 }
 
 ComputerID::ComputerID(char *raw_data) {
-    ifs = (int)raw_data[0];
+//    memcpy(this, raw_data, sizeof(*this));
+    memcpy(&ifs, raw_data, sizeof(int));
     memmove(host, raw_data + sizeof(int), MAX_HOST_NAME);
+}
+
+ComputerID::ComputerID(const ComputerID &other) {
+    ifs = other.ifs;
+    memmove(host, other.host, MAX_HOST_NAME);
 }
 
 bool ComputerID::operator< (const ComputerID& other) const {
@@ -61,12 +67,13 @@ size_t ConnectionRequest::serialize(byte_t *buf, size_t buf_size) {
 
 
 size_t CommunicateConnectionRequest::serialize(byte_t *buf, size_t buf_size) {
-    size_t needed_size = command.length();
+    size_t needed_size = command.length() + 1;
     if (needed_size > buf_size) {
         throw length_error("Buff size is not sufficient");
     }
     size_t res = ConnectionRequest::serialize(buf, buf_size - needed_size);
-    memmove(buf + res, command.c_str(), needed_size);
+    memmove(buf + res, command.c_str(), needed_size - 1);
+    buf[res + needed_size] = 0;
     return res + needed_size;
 }
 
@@ -88,9 +95,8 @@ TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
     }
     request_type_t cmd_type;
     memmove(&cmd_type, cmd, sizeof(request_type_t));
-//    request_type_t cmd_type = (request_type_t)*cmd;
     cmd += sizeof(request_type_t);
-    cout << "Received command: " << cmd_type << endl;
+
     switch (cmd_type) {
         case LIST_INTERFACES:
             if (ListInterfaceRequest::get_size() != command_size) {
@@ -112,12 +118,17 @@ TunnelRequest* parse_request(byte_t *cmd, size_t command_size) {
                 throw length_error("Command has invalid length");
             }
             return new CloseConnectionRequest(ComputerID((char*)cmd));
-        case COMMUNICATE_CONNECTION:
+        case COMMUNICATE_CONNECTION: {
             if (CommunicateConnectionRequest::get_size() > command_size) {
                 throw length_error("Command has invalid length");
             }
-            cmd[command_size - sizeof(request_type_t)] = '\0';
-            return new CommunicateConnectionRequest(ComputerID((char*)cmd), string((char*)cmd + sizeof(ComputerID)));
+            cmd[command_size - sizeof(request_type_t) - 1] = '\0';
+            CommunicateConnectionRequest *tt = new CommunicateConnectionRequest(ComputerID((char *) cmd),
+                                                                                string((char *) cmd +
+                                                                                       sizeof(ComputerID)));
+            cout << "Command is: " << tt->get_command() << endl;
+            return tt;
+        }
         default:
             throw invalid_argument("Invalid command type");
     }
